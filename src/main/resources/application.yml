@@ -1,0 +1,21 @@
+server:
+  port: 8091
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/plazoleta
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+feign:
+  usuario:
+    url: http://localhost:8090
+jwt:
+  secret: 93fa3e4624676f2e9aa143911118b4547087e9b6e0b6076f2e1027d7a2da2b0a
+  expiration: 86400000
+
+appDescription: "plazoleta API - Microservicio de Plazoleta"
+appVersion: "1.0.0"

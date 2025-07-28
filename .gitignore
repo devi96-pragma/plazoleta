@@ -1,0 +1,58 @@
+### Java ###
+*.class
+*.log
+*.ctxt
+*.jar
+*.war
+*.ear
+
+### Gradle ###
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+!gradle/wrapper/gradle-wrapper.jar
+.gradle-cache/
+.gradle-node/
+
+# Ignore Gradle daemon logs
+*.hprof
+*.pid
+gradle-app.setting
+.gradle-local/
+
+# Ignore IDE-specific files
+
+### VS Code ###
+.vscode/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+### Eclipse / STS ###
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans/
+.sts4-cache/
+
+### NetBeans ###
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+### OS Files ###
+.DS_Store
+Thumbs.db
+
+### Test Reports ###
+/test-results/
+/reports/
