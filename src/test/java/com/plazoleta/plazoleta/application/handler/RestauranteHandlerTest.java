@@ -1,5 +1,6 @@
 package com.plazoleta.plazoleta.application.handler;
 
+import com.plazoleta.plazoleta.application.dto.RestauranteListaResponseDto;
 import com.plazoleta.plazoleta.application.dto.RestauranteRequestDto;
 import com.plazoleta.plazoleta.application.dto.RestauranteResponseDto;
 import com.plazoleta.plazoleta.application.mapper.IRestauranteRequestMapper;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,5 +56,31 @@ public class RestauranteHandlerTest {
 
         // Assert
         verify(restauranteServicePort, times(1)).findRestauranteById(idRestaurante);
+    }
+    @Test
+    public void listarRestaurantesOrdenadosPorNombre_conParametrosValidos() {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        Restaurante restaurante1 = new Restaurante();
+        restaurante1.setId(1L);
+        Restaurante restaurante2 = new Restaurante();
+        restaurante2.setId(2L);
+
+        RestauranteListaResponseDto restauranteDto1 = new RestauranteListaResponseDto();
+        RestauranteListaResponseDto restauranteDto2 = new RestauranteListaResponseDto();
+
+        List<RestauranteListaResponseDto> restaurantesDto = List.of(restauranteDto1, restauranteDto2);
+        List<Restaurante> restaurantes = List.of(restaurante1, restaurante2);
+        //Devuelves la lista de restaurantes ordenados por nombre
+        when(restauranteServicePort.listarRestaurantesOrdenadosPorNombre(0,10)).thenReturn(restaurantes);
+        //Conviertes la lista de restaurantes a una lista de DTOs
+        when(restauranteResponseMapper.toResponseList(restaurantes)).thenReturn(restaurantesDto);
+        // Act
+        restauranteHandler.listarRestaurantesOrdenadosPorNombre(page, size);
+
+        // Assert
+        verify(restauranteResponseMapper, times(1)).toResponseList(restaurantes);
+        verify(restauranteServicePort, times(1)).listarRestaurantesOrdenadosPorNombre(page, size);
     }
 }

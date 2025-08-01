@@ -7,6 +7,11 @@ import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.spi.IRestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.IUsuarioValidatorPort;
 
+import java.util.List;
+
+import static com.plazoleta.plazoleta.domain.constantes.Constantes.MensajesError.RESTAURANTE_NO_ENCONTRADO;
+import static com.plazoleta.plazoleta.domain.constantes.Constantes.MensajesError.USUARIO_NO_ES_PROPIETARIO;
+
 public class RestauranteUseCase implements IRestauranteServicePort {
 
     private final IRestaurantePersistencePort restaurantePersistencePort;
@@ -17,14 +22,18 @@ public class RestauranteUseCase implements IRestauranteServicePort {
     }
     @Override
     public void crearRestaurante(Restaurante restaurante) {
-        if(!usuarioValidatorPort.validarUsuario(restaurante.getUsuarioId())) {
-            throw new UsuarioNoEsPropietarioException("El usuario no es propietario o no existe");
+        if(!usuarioValidatorPort.validarUsuarioPropietario(restaurante.getUsuarioId())) {
+            throw new UsuarioNoEsPropietarioException(USUARIO_NO_ES_PROPIETARIO);
         }
         restaurantePersistencePort.saveRestaurante(restaurante);
     }
     @Override
     public Restaurante findRestauranteById(Long idRestaurante) {
         return restaurantePersistencePort.findRestauranteById(idRestaurante)
-                .orElseThrow(() -> new RestauranteNoEncontradoException("Restaurante no encontrado"));
+                .orElseThrow(() -> new RestauranteNoEncontradoException(RESTAURANTE_NO_ENCONTRADO));
+    }
+    @Override
+    public List<Restaurante> listarRestaurantesOrdenadosPorNombre(int page, int size) {
+        return restaurantePersistencePort.listarRestaurantesOrdenadosPorNombre(page, size);
     }
 }

@@ -1,10 +1,12 @@
 package com.plazoleta.plazoleta.infrastructure.out.jwt.filter;
 
+import com.plazoleta.plazoleta.domain.api.ITokenServicePort;
 import com.plazoleta.plazoleta.infrastructure.out.jwt.adapter.JwtTokenAdapter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Profile("!test")
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -45,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     // Crea la autenticación
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            username, null, authorities
+                            username, token, authorities
                     );
 
                     //Guarda el ID en los detalles

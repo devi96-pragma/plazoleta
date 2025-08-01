@@ -1,5 +1,7 @@
 package com.plazoleta.plazoleta.domain.usecase;
 
+import com.plazoleta.plazoleta.domain.api.IRestauranteServicePort;
+import com.plazoleta.plazoleta.domain.api.ITokenServicePort;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEsDelUsuarioException;
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -24,9 +27,11 @@ public class PlatoUseCaseTest {
     @Mock
     private IPlatoPersistencePort platoPersistencePort;
     @Mock
-    private IRestaurantePersistencePort restaurantePersistencePort;
+    private IRestauranteServicePort restauranteServicePort;
     @InjectMocks
     private PlatoUseCase platoUseCase;
+    @Mock
+    private ITokenServicePort tokenServicePort;
 
     //Happy Path: crear un plato cuando el usuario es propietario del restaurante y el restaurante existe
     @Test
@@ -34,14 +39,14 @@ public class PlatoUseCaseTest {
         // Arrange
         Plato plato = new Plato();
         plato.setIdRestaurante(1L);
-        plato.setIdUsuario(2L); // tiene asignado el usuario 2L
         Restaurante restaurante = new Restaurante();
         restaurante.setId(1L);
         restaurante.setUsuarioId(2L); // el restaurante es del usuario 2L
 
-        when(restaurantePersistencePort.findRestauranteById(1L))
-                .thenReturn(Optional.of(restaurante));
-
+        when(restauranteServicePort.findRestauranteById(1L))
+                .thenReturn(restaurante);
+        when(tokenServicePort.getUserIdFromToken())
+                .thenReturn(2L); // Simulamos que el usuario autenticado es el propietario del restaurante
         // Act
         platoUseCase.crearPlato(plato);
 
@@ -54,18 +59,22 @@ public class PlatoUseCaseTest {
         // Arrange
         Plato plato = new Plato();
         plato.setIdRestaurante(1L);
-        plato.setIdUsuario(3L); // tiene asignado el usuario 3L
+
         Restaurante restaurante = new Restaurante();
         restaurante.setId(1L);
         restaurante.setUsuarioId(2L); // el restaurante es del usuario 2L
-        when(restaurantePersistencePort.findRestauranteById(1L))
-                .thenReturn(Optional.of(restaurante));
+
+        when(restauranteServicePort.findRestauranteById(1L))
+                .thenReturn(restaurante);
+        when(tokenServicePort.getUserIdFromToken())
+                .thenReturn(3L);
+
         // act & assert
         assertThrows(
             RestauranteNoEsDelUsuarioException.class,
             () -> platoUseCase.crearPlato(plato)
         );
-        verify(restaurantePersistencePort,times(1))
+        verify(restauranteServicePort,times(1))
                 .findRestauranteById(1L); // Verifica que se intentó buscar el restaurante
         verify(platoPersistencePort, never()).crearPlato(plato); // Verifica que no se creó el plato
     }
@@ -75,16 +84,15 @@ public class PlatoUseCaseTest {
         // Arrange
         Plato plato = new Plato();
         plato.setIdRestaurante(1L);
-        plato.setIdUsuario(3L); // tiene asignado el usuario 3L
         // No se asigna un restaurante, simulando que no existe
-        when(restaurantePersistencePort.findRestauranteById(1L))
-                .thenReturn(Optional.empty());
+        when(restauranteServicePort.findRestauranteById(1L))
+                .thenThrow(new RestauranteNoEncontradoException("Restaurante no encontrado"));
         // act & assert
         assertThrows(
                 RestauranteNoEncontradoException.class,
                 () -> platoUseCase.crearPlato(plato)
         );
-        verify(restaurantePersistencePort,times(1))
+        verify(restauranteServicePort,times(1))
                 .findRestauranteById(1L); // Verifica que se intentó buscar el restaurante
         verify(platoPersistencePort, never()).crearPlato(plato); // Verifica que no se creó el plato
     }
@@ -100,9 +108,19 @@ public class PlatoUseCaseTest {
         platoExistente.setId(5L);
         platoExistente.setDescripcion("Plato Original");
         platoExistente.setPrecio(11);
+        platoExistente.setIdRestaurante(1L); // ID del restaurante al que pertenece el plato
+        //Restaurante del plato existente
+        Restaurante restaurante = new Restaurante();
+        restaurante.setId(1L);
+        restaurante.setUsuarioId(2L);
 
         when(platoPersistencePort.findPlatoById(5L))
                 .thenReturn(Optional.of(platoExistente));
+        //Validar restaurante del plato
+        when(restauranteServicePort.findRestauranteById(1L)).thenReturn(restaurante);
+        when(tokenServicePort.getUserIdFromToken())
+                .thenReturn(2L); // Simulamos que el usuario autenticado es el propietario del restaurante
+        //Actualizar el plato existente
         when(platoPersistencePort.actualizarPlato(platoExistente)).thenReturn(platoExistente);
 
         // Act
@@ -163,5 +181,46 @@ public class PlatoUseCaseTest {
             () -> platoUseCase.obtenerPlatoPorId(5L)
         );
         verify(platoPersistencePort, times(1)).findPlatoById(5L);
+    }
+    //Happy Path: habilitar un plato cuando el plato existe y se actualiza correctamente
+    @Test
+    void habilitarPlato_conPlatoExistente_exito() {
+        //Arrange
+        Plato plato = new Plato();
+        plato.setId(5L);
+        plato.setActivo(false);
+        plato.setIdRestaurante(1L);
+
+        Restaurante restaurante = new Restaurante();
+        restaurante.setUsuarioId(2L);
+        when(platoPersistencePort.findPlatoById(5L)).thenReturn(Optional.of(plato));
+        when(restauranteServicePort.findRestauranteById(1L)).thenReturn(restaurante);
+        when(tokenServicePort.getUserIdFromToken()).thenReturn(2L); // Simulamos que el usuario autenticado es el propietario del restaurante
+        when(platoPersistencePort.actualizarPlato(plato)).thenReturn(plato);
+        //Act
+        Plato platoResultado = platoUseCase.habilitarDeshabilitarPlato(5L, true);
+        //Assert
+        assertThat(platoResultado.isActivo()).isTrue();
+        assertThat(platoResultado.getId()).isEqualTo(5L);
+        assertNotNull(platoResultado, "El resultado no es nulo");
+        verify(platoPersistencePort, times(1)).findPlatoById(5L);
+        verify(restauranteServicePort, times(1)).findRestauranteById(1L);
+        verify(tokenServicePort, times(1)).getUserIdFromToken();
+        verify(platoPersistencePort, times(1)).actualizarPlato(plato);
+    }
+    //No happy path: habilitar un plato cuando el plato no existe
+    @Test
+    void habilitarPlato_conPlatoNoExistente_deberiaLanzarExcepcion() {
+        Plato plato = new Plato();
+        //Arrange
+        when(platoPersistencePort.findPlatoById(5L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(
+                PlatoNoEncontradoException.class,
+                () -> platoUseCase.habilitarDeshabilitarPlato( 5L, true)
+        );
+        verify(platoPersistencePort, times(1)).findPlatoById(5L);
+        verify(platoPersistencePort, never()).actualizarPlato(any());
     }
 }

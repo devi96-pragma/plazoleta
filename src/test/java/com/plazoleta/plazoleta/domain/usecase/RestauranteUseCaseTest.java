@@ -10,6 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -27,7 +30,7 @@ public class RestauranteUseCaseTest {
         // Arrange
         Restaurante restaurante = new Restaurante();
         restaurante.setUsuarioId(1L);
-        when(usuarioValidatorPort.validarUsuario(1L)).thenReturn(true);
+        when(usuarioValidatorPort.validarUsuarioPropietario(1L)).thenReturn(true);
 
         restauranteUseCase.crearRestaurante(restaurante);
         verify(restaurantePersistencePort).saveRestaurante(restaurante);
@@ -38,12 +41,30 @@ public class RestauranteUseCaseTest {
         // Arrange
         Restaurante restaurante = new Restaurante();
         restaurante.setUsuarioId(2L);
-        when(usuarioValidatorPort.validarUsuario(2L)).thenReturn(false);
+        when(usuarioValidatorPort.validarUsuarioPropietario(2L)).thenReturn(false);
 
         // Act & Assert
         assertThrows(UsuarioNoEsPropietarioException.class, () -> {
             restauranteUseCase.crearRestaurante(restaurante);
         });
         verify(restaurantePersistencePort, never()).saveRestaurante(any());
+    }
+    //Happy path: Listar restaurantes
+    @Test
+    void testListarRestaurantesOrdenadosPorNombre_devuelveLista() {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        Restaurante restaurante1 = new Restaurante();
+        restaurante1.setId(1L);
+        Restaurante restaurante2 = new Restaurante();
+        restaurante2.setId(2L);
+        when(restaurantePersistencePort.listarRestaurantesOrdenadosPorNombre(page, size))
+                .thenReturn(List.of(restaurante1, restaurante2));
+        List<Restaurante> restaurantes = restauranteUseCase.listarRestaurantesOrdenadosPorNombre(page, size);
+        assertThat(restaurantes.size()).isEqualTo(2);
+        assertThat(restaurantes.get(0).getId()).isEqualTo(1L);
+        assertThat(restaurantes.get(1).getId()).isEqualTo(2L);
+        verify(restaurantePersistencePort).listarRestaurantesOrdenadosPorNombre(page, size);
     }
 }

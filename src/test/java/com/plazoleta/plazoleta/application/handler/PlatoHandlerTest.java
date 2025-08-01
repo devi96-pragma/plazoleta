@@ -41,8 +41,8 @@ public class PlatoHandlerTest {
                 "Descripción del plato",
                 "https://example.com/image.jpg",
                 Categoria.BEBIDA,
-                1L,
-                1L);
+                1L
+                );
         Plato plato = new Plato(
                 null,
                 "Limonada",
@@ -51,8 +51,8 @@ public class PlatoHandlerTest {
                 "https://example.com/image.jpg",
                 Categoria.BEBIDA,
                 false,
-                1L,
-                1L);
+                1L
+                );
         when(platoCreateRequestMapper.toDomain(dto)).thenReturn(plato); // Mock the mapper to return a valid Plato object
         //act
         platoHandler.crearPlato(dto);
@@ -109,7 +109,6 @@ public class PlatoHandlerTest {
                 "https://example.com/image.jpg",
                 Categoria.BEBIDA,
                 true,
-                1L,
                 1L
         );
         PlatoResponseDto responseDto = new PlatoResponseDto(
@@ -120,8 +119,8 @@ public class PlatoHandlerTest {
                 "https://example.com/image.jpg",
                 Categoria.BEBIDA,
                 true,
-                1L,
                 1L
+
         );
         when(platoServicePort.obtenerPlatoPorId(idPlato)).thenReturn(plato);
         when(platoResponseMapper.toResponse(plato)).thenReturn(responseDto);

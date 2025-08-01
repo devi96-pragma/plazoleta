@@ -1,5 +1,6 @@
 package com.plazoleta.plazoleta.application.handler;
 
+import com.plazoleta.plazoleta.application.dto.EstadoPlatoRequest;
 import com.plazoleta.plazoleta.application.dto.PlatoCreateRequestDto;
 import com.plazoleta.plazoleta.application.dto.PlatoResponseDto;
 import com.plazoleta.plazoleta.application.dto.PlatoUpdateRequestDto;
@@ -7,10 +8,13 @@ import com.plazoleta.plazoleta.application.mapper.IPlatoCreateRequestMapper;
 import com.plazoleta.plazoleta.application.mapper.IPlatoResponseMapper;
 import com.plazoleta.plazoleta.application.mapper.IPlatoUpdateRequestMapper;
 import com.plazoleta.plazoleta.domain.api.IPlatoServicePort;
+import com.plazoleta.plazoleta.domain.model.Categoria;
 import com.plazoleta.plazoleta.domain.model.Plato;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +45,17 @@ public class PlatoHandler implements IPlatoHandler {
         // Implementación de la lógica para obtener un plato por su ID
         Plato plato = platoServicePort.obtenerPlatoPorId(idPlato);
         return platoResponseMapper.toResponse(plato);
+    }
+    @Override
+    public PlatoResponseDto habilitarDeshabilitarPlato(Long idPlato, EstadoPlatoRequest estadoPlatoRequest) {
+        Plato plato = platoServicePort.habilitarDeshabilitarPlato(idPlato, estadoPlatoRequest.isEstado());
+        return platoResponseMapper.toResponse(plato);
+    }
+
+    @Override
+    public List<PlatoResponseDto> listarPlatosPorRestaurante(Long idRestaurante, int page, int size, String categoria) {
+        return platoResponseMapper.toResponseList(
+                platoServicePort.listarPlatosPorRestaurante(idRestaurante, page, size, categoria)
+        );
     }
 }
