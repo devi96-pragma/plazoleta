@@ -15,7 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -133,5 +136,51 @@ public class PlatoHandlerTest {
         verify(platoServicePort).obtenerPlatoPorId(idPlato);
         verify(platoResponseMapper).toResponse(plato);
     }
+    @Test
+    public void testListarPlatosPorRestaurante_conDatosValidos_retornaListaDto() {
+        // Arrange
+        Long restauranteId = 1L;
+        int page = 0;
+        int size = 10;
+        String categoria = "principal";
 
+        Plato plato = new Plato(
+                1L,
+                "Arroz Chaufa",
+                15.5f,
+                "Arroz con pollo",
+                "http://img.com/arroz.jpg",
+                Categoria.PLATO_PRINCIPAL,
+                true,
+                restauranteId
+        );
+
+        PlatoResponseDto dto = new PlatoResponseDto(
+                1L,
+                "Arroz Chaufa",
+                15.5f,
+                "Arroz con pollo",
+                "http://img.com/arroz.jpg",
+                Categoria.PLATO_PRINCIPAL,
+                true,
+                restauranteId
+        );
+
+        List<Plato> platos = List.of(plato);
+        List<PlatoResponseDto> expectedDtos = List.of(dto);
+
+        when(platoServicePort.listarPlatosPorRestaurante(restauranteId, page, size, categoria))
+                .thenReturn(platos);
+        when(platoResponseMapper.toResponseList(platos)).thenReturn(expectedDtos);
+
+        // Act
+        List<PlatoResponseDto> resultado = platoHandler.listarPlatosPorRestaurante(restauranteId, page, size, categoria);
+
+        // Assert
+        assertEquals(1, resultado.size());
+        assertEquals("Arroz Chaufa", resultado.get(0).getNombre());
+        assertEquals(Categoria.PLATO_PRINCIPAL, resultado.get(0).getCategoria());
+        verify(platoServicePort).listarPlatosPorRestaurante(restauranteId, page, size, categoria);
+        verify(platoResponseMapper).toResponseList(platos);
+    }
 }

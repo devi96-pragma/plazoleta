@@ -5,6 +5,7 @@ import com.plazoleta.plazoleta.domain.api.ITokenServicePort;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEsDelUsuarioException;
+import com.plazoleta.plazoleta.domain.model.Categoria;
 import com.plazoleta.plazoleta.domain.model.Plato;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.spi.IPlatoPersistencePort;
@@ -15,11 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -222,5 +224,55 @@ public class PlatoUseCaseTest {
         );
         verify(platoPersistencePort, times(1)).findPlatoById(5L);
         verify(platoPersistencePort, never()).actualizarPlato(any());
+    }
+    @Test
+    void listarPlatosPorRestaurante_sinCategoria_retornaTodosLosPlatos() {
+        // Arrange
+        Long restauranteId = 1L;
+        int page = 0;
+        int size = 5;
+        String categoria = null;
+        Restaurante restauranteMock = new Restaurante();
+        restauranteMock.setUsuarioId(1L);
+        List<Plato> platosMock = List.of(
+                new Plato(1L, "Arroz Chaufa", 15.5f, "Arroz con pollo y verduras", "http://imagen.com/arroz.jpg",
+                        Categoria.PLATO_PRINCIPAL, true, restauranteId)
+        );
+        when(restauranteServicePort.findRestauranteById(restauranteId)).thenReturn(restauranteMock);
+        when(tokenServicePort.getUserIdFromToken()).thenReturn(1L);
+        when(platoPersistencePort.listarPlatosPorRestaurante(restauranteId, page, size)).thenReturn(platosMock);
+
+        // Act
+        List<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(restauranteId, page, size, categoria);
+
+        // Assert
+        assertEquals(1, resultado.size());
+        assertEquals("Arroz Chaufa", resultado.get(0).getNombre());
+        verify(platoPersistencePort).listarPlatosPorRestaurante(restauranteId, page, size);
+    }
+    @Test
+    void listarPlatosPorRestaurante_conCategoria_retornaTodosLosPlatos() {
+        // Arrange
+        Long restauranteId = 1L;
+        int page = 0;
+        int size = 5;
+        String categoria = "PLATO_PRINCIPAL";
+        Restaurante restauranteMock = new Restaurante();
+        restauranteMock.setUsuarioId(1L);
+        List<Plato> platosMock = List.of(
+                new Plato(1L, "Arroz Chaufa", 15.5f, "Arroz con pollo y verduras", "http://imagen.com/arroz.jpg",
+                        Categoria.PLATO_PRINCIPAL, true, restauranteId)
+        );
+        when(restauranteServicePort.findRestauranteById(restauranteId)).thenReturn(restauranteMock);
+        when(tokenServicePort.getUserIdFromToken()).thenReturn(1L);
+        when(platoPersistencePort.listarplatosPorRestauranteYCategoria(restauranteId,Categoria.PLATO_PRINCIPAL, page, size)).thenReturn(platosMock);
+
+        // Act
+        List<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(restauranteId, page, size, categoria);
+
+        // Assert
+        assertEquals(1, resultado.size());
+        assertEquals("Arroz Chaufa", resultado.get(0).getNombre());
+        verify(platoPersistencePort).listarplatosPorRestauranteYCategoria(restauranteId, Categoria.PLATO_PRINCIPAL, page, size);
     }
 }

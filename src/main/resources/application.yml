@@ -1,26 +1,28 @@
 server:
-  port: 8091
+  port: ${SERVER_PORT:8091}
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   datasource:
-    url: jdbc:mysql://localhost:3306/plazoleta
-    username: root
-    password: root
-
+    url:      ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
+
 feign:
   usuario:
-    url: http://localhost:8090
+    url: ${FEIGN_USUARIO_URL:http://localhost:8090}
 
 jwt:
-  secret: 93fa3e4624676f2e9aa143911118b4547087e9b6e0b6076f2e1027d7a2da2b0a
-  expiration: 86400000
+  secret:     ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
 
 empleados:
   creados:
-    queue: empleados.creados.queue
+    queue: ${EMPLEADOS_CREADOS_QUEUE:empleados.creados.queue}
 
-appDescription: "plazoleta API - Microservicio de Plazoleta"
-appVersion: "1.0.0"
+appDescription: ${APP_DESCRIPTION}
+appVersion:     ${APP_VERSION}

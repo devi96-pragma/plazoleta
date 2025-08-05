@@ -13,5 +13,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 public interface IUsuarioFeignClient {
     @GetMapping("/usuarios/{idUsuario}")
-    UsuarioResponseDto buscarPropietarioPorId(@PathVariable("idUsuario") Long id);
+    UsuarioResponseDto buscarUsuarioPorId(@PathVariable("idUsuario") Long id);
 }

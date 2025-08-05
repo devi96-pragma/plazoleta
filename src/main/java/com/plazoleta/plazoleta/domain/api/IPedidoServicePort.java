@@ -10,4 +10,8 @@ public interface IPedidoServicePort {
     void crearPedido(Pedido pedido);
     List<Pedido> buscarPedidosClienteEnProceso(Long idUsuario);
     List<Pedido> buscarPedidosPorEstado(int page, int size, EstadoPedido estado);
+    void asignarmePedido(Long idPedido);
+    void notificarPedidoCliente(Long idPedido);
+    void entregarPedido(Long idPedido, String pin);
+    void cancelarPedido(Long idPedido);
 }

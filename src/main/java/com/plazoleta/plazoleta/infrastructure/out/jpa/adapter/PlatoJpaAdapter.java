@@ -37,7 +37,7 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
     public List<Plato> listarPlatosPorRestaurante(Long idRestaurante, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return platoRepository
-                .findAllByIdRestauranteOrderByNombreAsc(idRestaurante,pageable)
+                .findAllByIdRestauranteAndIsActivoTrueOrderByNombreAsc(idRestaurante,pageable)
                 .stream()
                 .map(platoEntityMapper::toDomain)
                 .toList();
@@ -47,7 +47,7 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
     public List<Plato> listarplatosPorRestauranteYCategoria(Long idRestaurante, Categoria categoria, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return platoRepository
-                .findAllByIdRestauranteAndCategoriaOrderByNombreAsc(idRestaurante, categoria, pageable)
+                .findAllByIdRestauranteAndCategoriaAndIsActivoTrueOrderByNombreAsc(idRestaurante, categoria, pageable)
                 .stream()
                 .map(platoEntityMapper::toDomain)
                 .toList();

@@ -4,7 +4,7 @@ public final class Constantes {
     private Constantes() {
     }
     public static final class MensajesError{
-
+        public static final String PUBLICACION_EVENTO_FALLIDA = "Fallo al publicar en RabbitMQ";
     }
     public static final class ConstantesHttp{
         public static final String HEADER_AUTHORIZATION = "Authorization";

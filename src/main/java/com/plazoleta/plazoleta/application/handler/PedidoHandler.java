@@ -32,5 +32,25 @@ public class PedidoHandler implements IPedidoHandler{
         List<Pedido> pedidos = pedidoServicePort.buscarPedidosPorEstado(page,size,estado);
         return pedidoResponseMapper.toResponseList(pedidos);
     }
+
+    @Override
+    public void asignarmePedido(Long idPedido) {
+        pedidoServicePort.asignarmePedido(idPedido);
+    }
+
+    @Override
+    public void notificarPedidoListo(Long idPedido) {
+        pedidoServicePort.notificarPedidoCliente(idPedido);
+    }
+
+    @Override
+    public void entregarPedido(Long idPedido, String pin) {
+        pedidoServicePort.entregarPedido(idPedido,pin);
+    }
+
+    @Override
+    public void cancelarPedido(Long idPedido) {
+        pedidoServicePort.cancelarPedido(idPedido);
+    }
 }
 

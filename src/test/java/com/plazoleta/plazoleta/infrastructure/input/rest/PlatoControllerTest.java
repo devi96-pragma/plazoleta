@@ -5,6 +5,7 @@ import com.plazoleta.plazoleta.application.dto.PlatoCreateRequestDto;
 import com.plazoleta.plazoleta.application.dto.PlatoResponseDto;
 import com.plazoleta.plazoleta.application.dto.PlatoUpdateRequestDto;
 import com.plazoleta.plazoleta.application.handler.IPlatoHandler;
+import com.plazoleta.plazoleta.domain.model.Categoria;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,12 +15,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PlatoController.class)
@@ -84,5 +88,41 @@ public class PlatoControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk());
         verify(platoHandler).habilitarDeshabilitarPlato(eq(1L), any(EstadoPlatoRequest.class));
+    }
+    @Test
+    void testListarPlatosPorRestaurante_retornaListaDePlatos() throws Exception {
+        // Arrange
+        Long restauranteId = 1L;
+        int page = 0;
+        int size = 10;
+        String categoria = "principal";
+
+        PlatoResponseDto dto = new PlatoResponseDto(
+                1L,
+                "Arroz Chaufa",
+                15.5f,
+                "Arroz con pollo",
+                "http://img.com/arroz.jpg",
+                Categoria.PLATO_PRINCIPAL,
+                true,
+                restauranteId
+        );
+
+        List<PlatoResponseDto> platosMock = List.of(dto);
+
+        when(platoHandler.listarPlatosPorRestaurante(restauranteId, page, size, categoria))
+                .thenReturn(platosMock);
+
+        // Act & Assert
+        mockMvc.perform(get("/platos/restaurante/{idRestaurante}", restauranteId)
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .param("categoria", categoria))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].nombre").value("Arroz Chaufa"))
+                .andExpect(jsonPath("$[0].categoria").value("PLATO_PRINCIPAL"));
+
+        verify(platoHandler).listarPlatosPorRestaurante(restauranteId, page, size, categoria);
     }
 }

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IPlatoRepository extends JpaRepository<PlatoEntity, Long> {
-    Page<PlatoEntity> findAllByIdRestauranteOrderByNombreAsc(Long idRestaurante, Pageable pageable);
-    Page<PlatoEntity> findAllByIdRestauranteAndCategoriaOrderByNombreAsc(Long idRestaurante, Categoria categoria, Pageable pageable);
+    //Page<PlatoEntity> findAllByIdRestauranteOrderByNombreAsc(Long idRestaurante, Pageable pageable);
+    //Page<PlatoEntity> findAllByIdRestauranteAndCategoriaOrderByNombreAsc(Long idRestaurante, Categoria categoria, Pageable pageable);
+    Page<PlatoEntity> findAllByIdRestauranteAndIsActivoTrueOrderByNombreAsc(Long idRestaurante, Pageable pageable);
+    Page<PlatoEntity> findAllByIdRestauranteAndCategoriaAndIsActivoTrueOrderByNombreAsc(Long idRestaurante, Categoria categoria, Pageable pageable);
+
 }

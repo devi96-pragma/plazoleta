@@ -5,6 +5,7 @@ import com.plazoleta.plazoleta.application.dto.PedidoResponseDto;
 import com.plazoleta.plazoleta.application.handler.IPedidoHandler;
 import com.plazoleta.plazoleta.domain.model.EstadoPedido;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +33,26 @@ public class PedidoController {
     ){
         List<PedidoResponseDto> pedidos = pedidoHandler.obtenerListaPedidoPorEstado(page,size,estado);
         return ResponseEntity.ok(pedidos);
+    }
+    @PatchMapping("/{idPedido}")
+    public ResponseEntity<Void> asignarmePedido(@PathVariable Long idPedido){
+        pedidoHandler.asignarmePedido(idPedido);
+        return ResponseEntity.noContent().build(); // HTTP 204
+    }
+    @PatchMapping("/{idPedido}/notificar-listo")
+    public ResponseEntity<Void> notificarPedidoListo(@PathVariable Long idPedido) {
+        pedidoHandler.notificarPedidoListo(idPedido);
+        return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{idPedido}/entregar")
+    public ResponseEntity<Void> entregarPedido(@PathVariable Long idPedido,
+                                               @RequestParam @NotBlank String pin) {
+        pedidoHandler.entregarPedido(idPedido,pin);
+        return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{idPedido}/cancelar")
+    public ResponseEntity<Void> cancelarPedido(@PathVariable Long idPedido) {
+        pedidoHandler.cancelarPedido(idPedido);
+        return ResponseEntity.noContent().build();
     }
 }

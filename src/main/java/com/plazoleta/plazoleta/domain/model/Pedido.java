@@ -12,7 +12,8 @@ public class Pedido {
     private LocalDateTime fechaCreacion;
     private List<PedidoPlato> platos;
     private BigDecimal precioTotal;
-
+    private Long idEmpleado;
+    private String pin;
     public Pedido(Long id, Long idRestaurante, Long idUsuario, EstadoPedido estado, LocalDateTime fechaCreacion, List<PedidoPlato> platos) {
         this.id = id;
         this.idRestaurante = idRestaurante;
@@ -80,6 +81,23 @@ public class Pedido {
     public void setPrecioTotal(BigDecimal precioTotal) {
         this.precioTotal = precioTotal;
     }
+
+    public Long getIdEmpleado() {
+        return idEmpleado;
+    }
+
+    public void setIdEmpleado(Long idEmpleado) {
+        this.idEmpleado = idEmpleado;
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
     public void calcularPrecioTotal() {
         this.precioTotal = this.platos.stream()
                 .map(PedidoPlato::getSubtotal)

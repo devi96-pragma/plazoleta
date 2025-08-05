@@ -5,7 +5,7 @@ import com.plazoleta.plazoleta.domain.api.IRestauranteServicePort;
 import com.plazoleta.plazoleta.domain.api.ITokenServicePort;
 import com.plazoleta.plazoleta.domain.exception.CategoriaInvalidaException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
-import com.plazoleta.plazoleta.domain.exception.PlatoYaEnEstadoSolicitado;
+import com.plazoleta.plazoleta.domain.exception.PlatoYaEnEstadoSolicitadoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEsDelUsuarioException;
 import com.plazoleta.plazoleta.domain.model.Categoria;
 import com.plazoleta.plazoleta.domain.model.Plato;
@@ -61,7 +61,7 @@ public class PlatoUseCase implements IPlatoServicePort {
         validarRestauranteDeUsuario(plato.getIdRestaurante());
 
         if (plato.isActivo() == estado) {
-            throw new PlatoYaEnEstadoSolicitado(PLATO_YA_EN_ESTADO_SOLICITADO);
+            throw new PlatoYaEnEstadoSolicitadoException(PLATO_YA_EN_ESTADO_SOLICITADO);
         }
         plato.setActivo(estado);
         return platoPersistencePort.actualizarPlato(plato);
@@ -72,7 +72,7 @@ public class PlatoUseCase implements IPlatoServicePort {
         //Valida Categoria
         Categoria categoriaEnum = convertirCategoria(categoria);
         //Validar que el restaurante existe y es de el usuario
-        validarRestauranteDeUsuario(idRestaurante);
+        //validarRestauranteDeUsuario(idRestaurante);
         //Listar los platos del restaurante
         if (categoriaEnum == null) {
             return platoPersistencePort.listarPlatosPorRestaurante(idRestaurante, page, size);

@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static org.springframework.http.HttpMethod.*;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -31,8 +33,19 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/restaurantes").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/platos/**").hasRole("PROPIETARIO")
+                        .requestMatchers(POST, "/restaurantes").hasRole("ADMINISTRADOR")
+                        .requestMatchers(GET, "/platos/restaurante/*").hasRole("CLIENTE")//listarPlatosPorRestaurante
+                        .requestMatchers(GET,"/platos/*").hasRole("EMPLEADO")//findPlatoById
+                        .requestMatchers(PATCH,"/platos/*").hasRole("PROPIETARIO")//actualizarPlato deshabilitar habilitar plato
+                        .requestMatchers(POST,"/platos").hasRole("PROPIETARIO")//crearPlato
+                        .requestMatchers(GET, "/platos/restaurante/*").hasRole("CLIENTE")//Listar los platos de un restaurante
+                        .requestMatchers(GET, "/restaurantes").hasRole("CLIENTE")//Listar los restaurante x clientes
+                        .requestMatchers(POST, "/pedidos").hasRole("CLIENTE")
+                        .requestMatchers(GET, "/pedidos").hasRole("EMPLEADO")
+                        .requestMatchers(PATCH, "/pedidos/*").hasRole("EMPLEADO")
+                        .requestMatchers(GET, "/pedidos/*/notificar-listo").hasRole("EMPLEADO")
+                        .requestMatchers(PATCH, "/pedidos/*/entregar").hasRole("EMPLEADO")
+                        .requestMatchers(PATCH, "/pedidos/*/cancelar").hasRole("CLIENTE")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)

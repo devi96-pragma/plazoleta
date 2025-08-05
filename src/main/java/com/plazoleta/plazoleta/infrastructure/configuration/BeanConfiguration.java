@@ -3,6 +3,8 @@ package com.plazoleta.plazoleta.infrastructure.configuration;
 import com.plazoleta.plazoleta.domain.api.*;
 import com.plazoleta.plazoleta.domain.spi.*;
 import com.plazoleta.plazoleta.domain.usecase.*;
+import com.plazoleta.plazoleta.infrastructure.out.SecureRandom.adapter.PinGenerator;
+import com.plazoleta.plazoleta.infrastructure.out.feign.adapter.UsuarioConsultarAdapter;
 import com.plazoleta.plazoleta.infrastructure.out.feign.adapter.UsuarioValidatorFeignAdapter;
 import com.plazoleta.plazoleta.infrastructure.out.feign.client.IUsuarioFeignClient;
 import com.plazoleta.plazoleta.infrastructure.out.jpa.adapter.EmpleadoRestauranteJpaAdapter;
@@ -17,12 +19,13 @@ import com.plazoleta.plazoleta.infrastructure.out.jpa.repository.IEmpleadoRestau
 import com.plazoleta.plazoleta.infrastructure.out.jpa.repository.IPedidoRepository;
 import com.plazoleta.plazoleta.infrastructure.out.jpa.repository.IPlatoRepository;
 import com.plazoleta.plazoleta.infrastructure.out.jpa.repository.IRestauranteRepository;
-import com.plazoleta.plazoleta.infrastructure.out.jwt.adapter.JwtTokenAdapter;
-import com.plazoleta.plazoleta.infrastructure.out.jwt.config.JwtConfig;
-import com.plazoleta.plazoleta.infrastructure.out.jwt.filter.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
+import com.plazoleta.plazoleta.infrastructure.out.rabbitMQ.adapter.PedidoCambioEstadoRabbitEventPublisher;
+import com.plazoleta.plazoleta.infrastructure.out.rabbitMQ.adapter.PedidoRabbitEventPublisher;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.security.SecureRandom;
 
 @Configuration
 public class BeanConfiguration {
@@ -37,7 +40,10 @@ public class BeanConfiguration {
     public IUsuarioValidatorPort usuarioValidatorPort(IUsuarioFeignClient client) {
         return new UsuarioValidatorFeignAdapter(client);
     }
-
+    @Bean
+    public IUsuarioConsultarPort usuarioConsultarPort(IUsuarioFeignClient client){
+        return new UsuarioConsultarAdapter(client);
+    }
     @Bean
     public IPlatoPersistencePort platoPersistencePort(IPlatoRepository platoRepository, IPlatoEntityMapper platoEntityMapper) {
         return new PlatoJpaAdapter(platoRepository, platoEntityMapper);
@@ -61,19 +67,6 @@ public class BeanConfiguration {
                                               IRestauranteServicePort restauranteServicePort) {
         return new PlatoUseCase(platoPersistencePort, tokenServicePort, usuarioValidatorPort, restauranteServicePort);
     }
-   /* @Bean
-    public ITokenServicePort tokenServicePort(JwtConfig jwtConfig) {
-        return new JwtTokenAdapter(jwtConfig);
-    }
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenAdapter adapter){
-        return new JwtAuthenticationFilter(adapter);
-    }*/
-    /*
-    @Bean
-    public ITokenServicePort tokenServicePort(JwtConfig jwtConfig) {
-       return new JwtTokenAdapter(jwtConfig);
-    }*/
     @Bean
     public IRestauranteServicePort restauranteServicePort(IRestaurantePersistencePort servicePort, IUsuarioValidatorPort validator) {
         return new RestauranteUseCase(servicePort, validator);
@@ -83,8 +76,12 @@ public class BeanConfiguration {
     public IPedidoServicePort pedidoServicePort(IPedidoPersistancePort pedidoPersistance,
                                                 IPlatoServicePort platoService,
                                                 ITokenServicePort tokenService,
-                                                IEmpleadoRestauranteServicePort empleadoService){
-        return new PedidoUseCase(pedidoPersistance, platoService, tokenService, empleadoService);
+                                                IEmpleadoRestauranteServicePort empleadoService,
+                                                IPedidoEventPublishPort pedidoEventHandlerServicePort,
+                                                IPinGeneratorPort pinGeneratorPort,
+                                                IUsuarioConsultarPort usuarioConsultarPort,
+                                                IPedidoCambioEstadoEventPublishPort pedidoCambioEstadoEventPublishPort){
+        return new PedidoUseCase(pedidoPersistance, platoService, tokenService, empleadoService, pedidoEventHandlerServicePort, pinGeneratorPort, usuarioConsultarPort, pedidoCambioEstadoEventPublishPort);
     }
     @Bean
     public IEmpleadoRestauranteServicePort empleadoRestauranteServicePort(IEmpleadoRestaurantePersistencePort empleadoRestaurantePersistencePort){
@@ -93,6 +90,18 @@ public class BeanConfiguration {
     @Bean
     public IEmpleadoEventHandlerServicePort empleadoEventHandlerServicePort(IEmpleadoRestaurantePersistencePort persistence){
         return new EmpleadoCreadoEventUseCase(persistence);
+    }
+    @Bean
+    public IPinGeneratorPort pinGeneratorPort(){
+        return new PinGenerator(new SecureRandom());
+    }
+    @Bean
+    public IPedidoEventPublishPort pedidoEventPublishPort(RabbitTemplate rabbitTemplate){
+        return new PedidoRabbitEventPublisher(rabbitTemplate);
+    }
+    @Bean
+    public IPedidoCambioEstadoEventPublishPort pedidoCambioEstadoEventPublishPort(RabbitTemplate rabbitTemplate){
+        return new PedidoCambioEstadoRabbitEventPublisher(rabbitTemplate);
     }
 
 }

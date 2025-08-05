@@ -18,11 +18,10 @@ public class UsuarioValidatorFeignAdapter implements IUsuarioValidatorPort {
     @Override
     public boolean validarUsuarioPropietario(Long idUsuario) {
         try{
-            UsuarioResponseDto dto = client.buscarPropietarioPorId(idUsuario);
+            UsuarioResponseDto dto = client.buscarUsuarioPorId(idUsuario);
             return dto != null && dto.getRol() != null && dto.getRol().name().equals(Rol.PROPIETARIO.name());
         } catch (FeignException.NotFound e){
             return false;
         }
     }
-
 }

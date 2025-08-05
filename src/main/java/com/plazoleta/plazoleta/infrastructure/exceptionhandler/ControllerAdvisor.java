@@ -3,12 +3,12 @@ package com.plazoleta.plazoleta.infrastructure.exceptionhandler;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.plazoleta.plazoleta.domain.constantes.Constantes;
 import com.plazoleta.plazoleta.domain.exception.*;
+import com.plazoleta.plazoleta.infrastructure.exception.PublicacionEventoFallidaException;
 import com.plazoleta.plazoleta.infrastructure.exception.UsuarioNoEncontradoException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,8 +49,12 @@ public class ControllerAdvisor {
     public ResponseEntity<Map<String, String>> handlePlatoNoEncontradoException(PlatoNoEncontradoException e) {
         return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }
-    @ExceptionHandler(PlatoYaEnEstadoSolicitado.class)
-    public ResponseEntity<Map<String, String>> handlePlatoYaEnEstadoSolicitadoException(PlatoYaEnEstadoSolicitado e) {
+    @ExceptionHandler(PlatoYaEnEstadoSolicitadoException.class)
+    public ResponseEntity<Map<String, String>> handlePlatoYaEnEstadoSolicitadoException(PlatoYaEnEstadoSolicitadoException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler(EmpleadoSinRestauranteAsignadoException.class)
+    public ResponseEntity<Map<String, String>> handleEmpleadoSinRestauranteAsignadoException(EmpleadoSinRestauranteAsignadoException e) {
         return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
     }
 
@@ -66,6 +70,53 @@ public class ControllerAdvisor {
     public ResponseEntity<Map<String, String>> handleCategoriaInvalida(CategoriaInvalidaException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(PedidoEnProcesoException.class)
+    public ResponseEntity<Map<String, String>> handlePedidoEnProceso(PedidoEnProcesoException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler(PedidoNoCancelableException.class)
+    public ResponseEntity<Map<String, String>> handlePedidoNoCancelable(PedidoNoCancelableException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler(PedidoNoEncontradoException.class)
+    public ResponseEntity<Map<String, String>> handlePedidoNoEncontrado(PedidoNoEncontradoException e) {
+        return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PedidoNoEstaAsignadoAlEmpleadoException.class)
+    public ResponseEntity<Map<String, String>> handlePedidoNoAsignado(PedidoNoEstaAsignadoAlEmpleadoException e) {
+        return buildResponse(e.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(PedidosNoEnEstadoEnPreparacionException.class)
+    public ResponseEntity<Map<String, String>> handleNoPreparacion(PedidosNoEnEstadoEnPreparacionException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PedidosNoEnEstadoListoException.class)
+    public ResponseEntity<Map<String, String>> handleNoListo(PedidosNoEnEstadoListoException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PedidosNoEnEstadoPendienteException.class)
+    public ResponseEntity<Map<String, String>> handleNoPendiente(PedidosNoEnEstadoPendienteException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PinIncorrectoException.class)
+    public ResponseEntity<Map<String, String>> handlePinIncorrecto(PinIncorrectoException e) {
+        return buildResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(PlatoNoPerteneceRestauranteException.class)
+    public ResponseEntity<Map<String, String>> handlePlatoNoPertenece(PlatoNoPerteneceRestauranteException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PublicacionEventoFallidaException.class)
+    public ResponseEntity<Map<String, String>> handlePublicacionEventoFallidaException(PublicacionEventoFallidaException e) {
+        return buildResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleJsonParseError(HttpMessageNotReadableException ex) {
         Throwable mostSpecificCause = ex.getMostSpecificCause();
